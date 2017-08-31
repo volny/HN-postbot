@@ -14,16 +14,18 @@ const URI = 'https://www.techmeme.com/river'
 
 const getLinks = async (page) => {
   const links = await page.evaluate(() => {
-    const tags = [...document.querySelectorAll('#countercol > table > tbody > tr > td > a')]
-    return tags.map((tag) => tag.getAttribute('href'))
+    const tbodies = document.querySelectorAll('#countercol > table > tbody')
+    const today = [...tbodies[0].querySelectorAll('.ritem > td > a')]
+    return today.map((story) => story.getAttribute('href'))
   })
   return links
 }
 
 const getTwitterIDs = async (page) => {
   const twitterIDs = await page.evaluate(() => {
-    const tags = [...document.querySelectorAll('#countercol > table > tbody > tr > td > .rshr')]
-    return tags.map((tag) => tag.getAttribute('twid'))
+    const tbodies = document.querySelectorAll('#countercol > table > tbody')
+    const today = [...tbodies[0].querySelectorAll('.ritem > td > .rshr')]
+    return today.map((story) => story.getAttribute('twid'))
   })
   return twitterIDs
 }
