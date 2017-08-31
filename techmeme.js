@@ -72,19 +72,23 @@ const makeSubmissionList = async (page, links, twitterIDs) => {
   }))
 }
 
-;(async () => {
-  const browser = await puppeteer.launch({headless: false})
-  const page = await browser.newPage()
-  await page.goto(URI)
+module.exports = {
+  getStories: async () => {
+    const browser = await puppeteer.launch({headless: false})
+    const page = await browser.newPage()
+    await page.goto(URI)
 
-  try {
-    const links = await getLinks(page)
-    const twitterIDs = await getTwitterIDs(page)
-    const submissionList = await makeSubmissionList(page, links, twitterIDs)
-    console.log(submissionList)
-  } catch (error) {
-    console.error(error)
+    try {
+      const links = await getLinks(page)
+      const twitterIDs = await getTwitterIDs(page)
+      const submissionList = await makeSubmissionList(page, links, twitterIDs)
+
+      browser.close()
+
+      return submissionList
+    } catch (error) {
+      console.error(error)
+      browser.close()
+    }
   }
-
-  browser.close()
-})()
+}
