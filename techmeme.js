@@ -1,5 +1,3 @@
-const puppeteer = require('puppeteer')
-
 const URI = 'https://www.techmeme.com/river'
 
 // I dislike that I have to traverse the DOM twice to get my links/twitter ids
@@ -8,29 +6,21 @@ const URI = 'https://www.techmeme.com/river'
 // see commit 'error - why do we get empty responses' for the approach I took
 
 const getLinks = async (page) => {
-  try {
-    const links = await page.evaluate(() => {
-      const tbodies = document.querySelectorAll('#countercol > table > tbody')
-      const today = [...tbodies[0].querySelectorAll('.ritem > td > a')]
-      return today.map((story) => story.getAttribute('href'))
-    })
-    return links
-  } catch (error) {
-    console.error(error)
-  }
+  const links = await page.evaluate(() => {
+    const tbodies = document.querySelectorAll('#countercol > table > tbody')
+    const today = [...tbodies[0].querySelectorAll('.ritem > td > a')]
+    return today.map((story) => story.getAttribute('href'))
+  })
+  return links
 }
 
 const getTwitterIDs = async (page) => {
-  try {
-    const twitterIDs = await page.evaluate(() => {
-      const tbodies = document.querySelectorAll('#countercol > table > tbody')
-      const today = [...tbodies[0].querySelectorAll('.ritem > td > .rshr')]
-      return today.map((story) => story.getAttribute('twid'))
-    })
-    return twitterIDs
-  } catch (error) {
-    console.error(error)
-  }
+  const twitterIDs = await page.evaluate(() => {
+    const tbodies = document.querySelectorAll('#countercol > table > tbody')
+    const today = [...tbodies[0].querySelectorAll('.ritem > td > .rshr')]
+    return today.map((story) => story.getAttribute('twid'))
+  })
+  return twitterIDs
 }
 
 const getTitleFromID = async (page, twitterID) => {
@@ -38,17 +28,13 @@ const getTitleFromID = async (page, twitterID) => {
   // techmeme has this bug where sometimes it creates no twitterlink
   // e.g. https://www.techmeme.com/170831/p11#a170831p11
   if (twitterID) {
-    try {
-      await page.goto(twitterURI)
-      const title = await page.evaluate(() => {
-        const text = document.querySelector('.tweet-text').innerHTML
-        const title = text.substring(0, text.indexOf('<a') - 1)
-        return title
-      })
+    await page.goto(twitterURI)
+    const title = await page.evaluate(() => {
+      const text = document.querySelector('.tweet-text').innerHTML
+      const title = text.substring(0, text.indexOf('<a') - 1)
       return title
-    } catch (error) {
-      console.error(error)
-    }
+    })
+    return title
   } else {
     return ''
   }
@@ -57,15 +43,10 @@ const getTitleFromID = async (page, twitterID) => {
 const makeSubmissionList = async (page, links, twitterIDs) => {
   // not proud, but `map` doesn't `await`, and this is the most straightforward and readable way
   let titles = []
-  try {
-    for (let twitterID of twitterIDs) {
-      const title = await getTitleFromID(page, twitterID)
-      titles.push(title)
-    }
-  } catch (error) {
-    console.error(error)
+  for (let twitterID of twitterIDs) {
+    const title = await getTitleFromID(page, twitterID)
+    titles.push(title)
   }
-
   return links.map((link, i) => ({
     title: titles[i],
     link: link
@@ -73,22 +54,15 @@ const makeSubmissionList = async (page, links, twitterIDs) => {
 }
 
 module.exports = {
-  getStories: async () => {
-    const browser = await puppeteer.launch({headless: false})
-    const page = await browser.newPage()
-    await page.goto(URI)
-
+  getStories: async (page) => {
     try {
+      await page.goto(URI)
       const links = await getLinks(page)
       const twitterIDs = await getTwitterIDs(page)
-      const submissionList = await makeSubmissionList(page, links, twitterIDs)
-
-      browser.close()
-
-      return submissionList
+      const submissionsList = await makeSubmissionList(page, links, twitterIDs)
+      return submissionsList
     } catch (error) {
-      console.error(error)
-      browser.close()
+      console.error('Error in techmeme.js', error)
     }
   }
 }

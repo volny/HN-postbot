@@ -16,7 +16,7 @@ module.exports = {
       await page.click(BUTTON_SELECTOR)
       await page.waitForNavigation()
     } catch (error) {
-      console.error(error)
+      console.error('Error in login.js', error)
     }
   }
 }
