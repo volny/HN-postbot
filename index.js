@@ -9,16 +9,13 @@ const { filterStoryList, writeNewQueue } = require('./utils')
 
 const DEBUG = true
 
-// TODO do this in a sane way - without the iife's - just a proper if/else at the end of file (separate the arg processing from doing our magic)
-
 // TODO (maybe) - write a function decorator that does the repetitive stuff and outputs the funcs below (take in a func, decorate it, return a new func)
 
 // TODO still have to figure out this one case where the cue is empty because we havn't fetched the newest ones - go scrape again
 
-const postArg = argv.post
-const queueArg = argv['build-queue']
 
-queueArg && (async () => {
+
+const buildQueue = async () => {
   console.log('Building Queue...')
   const browser = await puppeteer.launch({headless: !DEBUG})
   const page = await browser.newPage()
@@ -30,9 +27,9 @@ queueArg && (async () => {
   await writeNewQueue(unpostedStories)
 
   browser.close()
-})()
+}
 
-postArg && (async () => {
+const post = async () => {
   console.log('Posting Story from Queue...')
   const browser = await puppeteer.launch({headless: !DEBUG})
   const page = await browser.newPage()
@@ -58,6 +55,10 @@ postArg && (async () => {
   }
 
   browser.close()
-})()
+}
 
+const postArg = argv.post
+const queueArg = argv['build-queue']
+queueArg && buildQueue()
+postArg && post()
 !queueArg && !postArg && console.log('What do you want to do? Please supply arguments --build-queue or --post')
