@@ -1,11 +1,9 @@
-const { storyPostedAlready, writeNewQueue, postHasSucceeded } = require('./utils')
+const { storyPostedAlready, writeNewQueue, postHasSucceeded, shortenTitle } = require('./utils')
 
 const URI = 'https://news.ycombinator.com/submit'
 const TITLE_SELECTOR = 'input[name="title"]'
 const LINK_SELECTOR = 'input[name="url"]'
 const BUTTON_SELECTOR = 'input[type="submit"]'
-
-// TODO check if title is too long, if so change it or skip
 
 const takeOffCue = async (queue) => {
   const story = queue[queue.length - 1]
@@ -26,8 +24,10 @@ const postIfNew = async (page, queue, story) => {
 
   const [newQueue, newStory] = await takeOffCue(queue)
 
+  newStory.title = shortenTitle(newStory.title)
+
   // already posted - try next story in the queue
-  return await postIfNew(page, newQueue, newStory)
+  return postIfNew(page, newQueue, newStory)
 }
 
 const postStory = async (page, story) => {
@@ -47,6 +47,11 @@ const postStory = async (page, story) => {
 const postNext = async (page, queue) => {
   const [newQueue, story] = await postIfNew(page, queue)
   if (story) {
+    if (!story.title) {
+      console.log('Couldn\'t shorten title - omitting story')
+      await writeNewQueue(newQueue)
+      return newQueue
+    }
     const succeeded = await postHasSucceeded(story.link)
     if (succeeded) {
       console.log('Posting succeeded:', story.title)

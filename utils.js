@@ -59,7 +59,27 @@ const writeNewQueue = async (queue) => {
   }
 }
 
+const shortenTitle = (title) => {
+  if (title.length <= 80) {
+    return title
+  }
+  if (title.includes(' and')) {
+    const newTitle = title.replace(/ and/gi, ',')
+    return shortenTitle(newTitle)
+  }
+  if (title.includes(' with')) {
+    const newTitle = title.replace(/with/gi, 'w/')
+    return shortenTitle(newTitle)
+  }
+  if (title.includes(',')) {
+    const index = title.lastIndexOf(',')
+    return shortenTitle(title.slice(0, index))
+  }
+  return false
+}
+
 module.exports.storyPostedAlready = storyPostedAlready
 module.exports.filterStoryList = filterStoryList
 module.exports.postHasSucceeded = postHasSucceeded
 module.exports.writeNewQueue = writeNewQueue
+module.exports.shortenTitle = shortenTitle
