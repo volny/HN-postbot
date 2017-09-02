@@ -44,8 +44,12 @@ const makeSubmissionList = async (page, links, twitterIDs) => {
   // not proud, but `map` doesn't `await`, and this is the most straightforward and readable way
   let titles = []
   for (let twitterID of twitterIDs) {
-    const title = await getTitleFromID(page, twitterID)
-    titles.push(title)
+    try {
+      const title = await getTitleFromID(page, twitterID)
+      titles.push(title)
+    } catch (error) {
+      console.log(error)
+    }
   }
   return links.map((link, i) => ({
     title: titles[i],
