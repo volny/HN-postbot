@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer')
 
-const login = require('./hnLogin').login
+const login = require('./login').login
 const getStories = require('./techmeme').getStories
-const postStory = require('./hnPost').postStory
+const postStory = require('./post').postStory
 const filterPosted = require('./request').filterPosted
 const postHasSucceeded = require('./request').postHasSucceeded
 

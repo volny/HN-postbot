@@ -1,10 +1,5 @@
 const URI = 'https://www.techmeme.com/river'
 
-// I dislike that I have to traverse the DOM twice to get my links/twitter ids
-// the 'correct' way of doing this would be to `getStories`, an array of DOM nodes, and then get whatever out of that
-// trouble is chrome gives me an array of 'elementHandles' that have no (documented) way to access it's children
-// see commit 'error - why do we get empty responses' for the approach I took
-
 const getLinks = async (page) => {
   const links = await page.evaluate(() => {
     const tbodies = document.querySelectorAll('#countercol > table > tbody')
@@ -57,16 +52,14 @@ const makeSubmissionList = async (page, links, twitterIDs) => {
   }))
 }
 
-module.exports = {
-  getStories: async (page) => {
-    try {
-      await page.goto(URI)
-      const links = await getLinks(page)
-      const twitterIDs = await getTwitterIDs(page)
-      const submissionsList = await makeSubmissionList(page, links, twitterIDs)
-      return submissionsList
-    } catch (error) {
-      console.error('Error in techmeme.js', error)
-    }
+module.exports.getStories = async (page) => {
+  try {
+    await page.goto(URI)
+    const links = await getLinks(page)
+    const twitterIDs = await getTwitterIDs(page)
+    const submissionsList = await makeSubmissionList(page, links, twitterIDs)
+    return submissionsList
+  } catch (error) {
+    console.error('Error in techmeme.js', error)
   }
 }
