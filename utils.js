@@ -1,11 +1,11 @@
 const request = require('request-promise')
+const fs = require('fs-extra')
 
-const { postStory } = require('./post')
 const secrets = require('./secrets.js')
 
 const storyPostedAlready = async (story) => {
-  const URI = `https://hn.algolia.com/api/v1/search?query=${story.link}&restrictSearchableAttributes=url`
   if (story) {
+    const URI = `https://hn.algolia.com/api/v1/search?query=${story.link}&restrictSearchableAttributes=url`
     try {
       const data = await request(URI)
       const json = JSON.parse(data)
@@ -59,27 +59,7 @@ const writeNewQueue = async (queue) => {
   }
 }
 
-const takeOffCue = async (queue) => {
-  // TODO if the queue is empty make a new one!
-  const story = queue[queue.length - 1]
-  const newQueue = queue.slice(0, queue.length - 1)
-  return [newQueue, story]
-}
-
-const postIfNew = async (queue, story) => {
-  if (!storyPostedAlready(story)) {
-    await postStory(story)
-    return queue
-  }
-
-  // already posted - try next story in the queue
-  const [newQueue, newStory] = await takeOffCue(queue)
-  await postIfNew(newQueue, newStory)
-}
-
 module.exports.storyPostedAlready = storyPostedAlready
 module.exports.filterStoryList = filterStoryList
 module.exports.postHasSucceeded = postHasSucceeded
 module.exports.writeNewQueue = writeNewQueue
-module.exports.takeOffCue = takeOffCue
-module.exports.postIfNew = postIfNew

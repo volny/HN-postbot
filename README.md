@@ -23,6 +23,8 @@ Scrapes TM for today's submitted stories, checks if they've already been posted 
 
 ## Usage
 
+Needs Node 7.6.0 or newer because of await/async.
+
 Put your HN username and password in `secrets.js`.
 
 `node index.js --build-queue` scrapes and puts the resulting list of stories in `output/queue.json`
