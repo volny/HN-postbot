@@ -1,10 +1,13 @@
-// take in a story object and post it to hn
+const { postHasSucceeded, storyPostedAlready, writeNewQueue, takeOffCue, postIfNew } = require('./utils')
+
 
 const URI = 'https://news.ycombinator.com/submit'
 const TITLE_SELECTOR = 'input[name="title"]'
 const LINK_SELECTOR = 'input[name="url"]'
 const BUTTON_SELECTOR = 'input[type="submit"]'
 
+// TODO: probably postIfNew should be here
+// TODO: and postHasSucceeded should be here too
 module.exports.postStory = async (page, story) => {
   try {
     await page.goto(URI)
@@ -18,3 +21,10 @@ module.exports.postStory = async (page, story) => {
     console.error('Error in postHN.js', error)
   }
 }
+    // TODO
+    // const succeeded = await postHasSucceeded(story.link)
+    // if (succeeded) {
+    //   console.log(hasSucceeded ? 'Post succeeded:' : 'Posting failed:', story.title)
+    //   await writeNewQueue(newQueue)
+    // }
+
