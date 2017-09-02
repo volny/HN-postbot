@@ -1,11 +1,12 @@
-const DEBUG = true
-
 const puppeteer = require('puppeteer')
+
 const login = require('./hnLogin').login
 const getStories = require('./techmeme').getStories
-const filterPosted = require('./algolia').filterPosted
-const postStory = require('./hnPost.js').postStory
-const postHasSucceeded = require('./confirm.js').postHasSucceeded
+const postStory = require('./hnPost').postStory
+const filterPosted = require('./request').filterPosted
+const postHasSucceeded = require('./request').postHasSucceeded
+
+const DEBUG = true
 
 ;(async () => {
   try {
