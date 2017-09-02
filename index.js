@@ -9,12 +9,6 @@ const { filterStoryList, writeNewQueue } = require('./utils')
 
 const DEBUG = true
 
-// TODO (maybe) - write a function decorator that does the repetitive stuff and outputs the funcs below (take in a func, decorate it, return a new func)
-
-// TODO still have to figure out this one case where the cue is empty because we havn't fetched the newest ones - go scrape again
-
-
-
 const buildQueue = async () => {
   console.log('Building Queue...')
   const browser = await puppeteer.launch({headless: !DEBUG})
@@ -27,6 +21,8 @@ const buildQueue = async () => {
   await writeNewQueue(unpostedStories)
 
   browser.close()
+
+  return unpostedStories
 }
 
 const post = async () => {
@@ -41,14 +37,24 @@ const post = async () => {
     const queue = JSON.parse(queueString)
 
     try {
-      await postNext(page, queue)
+      const newQueue = await postNext(page, queue)
+
+      if (newQueue.length < 1) {
+        console.log('Queue is empty. Rebuilding ...')
+        const rebuiltQueue = await buildQueue()
+        console.log({rebuiltQueue})
+        if (rebuiltQueue.length < 1) {
+          console.log('All Stories have been posted. Done.')
+          return
+        }
+      }
     } catch (error) {
       console.log('Something went wrong with posting the story\n', error)
     }
   } catch (error) {
     if (error.code === 'ENOENT') {
-      // TODO there is no queue - make one
-      // TODO recursively start over
+      await buildQueue()
+      return await post()
     } else {
       console.error(error)
     }

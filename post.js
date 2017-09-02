@@ -7,10 +7,7 @@ const BUTTON_SELECTOR = 'input[type="submit"]'
 
 // TODO check if title is too long, if so change it or skip
 
-// TODO still have to figure out this one case where the cue is empty because we havn't fetched the newest ones - go scrape again
-
 const takeOffCue = async (queue) => {
-  // TODO if the queue is empty make a new one!
   const story = queue[queue.length - 1]
   const newQueue = queue.slice(0, queue.length - 1)
   return [newQueue, story]
@@ -23,10 +20,8 @@ const postIfNew = async (page, queue, story) => {
     return [queue, story]
   }
 
-  // TODO if we're done, meaning we posted all stories there are ...
-  // we probably want to replenish the queue, and if all in the new queue have been posted already, just stop
   if (queue.length < 1) {
-    return (queue, story)
+    return [queue, story]
   }
 
   const [newQueue, newStory] = await takeOffCue(queue)
@@ -51,19 +46,19 @@ const postStory = async (page, story) => {
 
 const postNext = async (page, queue) => {
   const [newQueue, story] = await postIfNew(page, queue)
-
-  if (newQueue === [] && story === undefined) {
-    console.log('We\re through the queue - everything has been posted!')
-    return
-  }
-  const succeeded = await postHasSucceeded(story.link)
-  if (succeeded) {
-    console.log('Posting succeeded:', story.title)
-    // after successful post we take it off the queue
-    await writeNewQueue(newQueue)
+  if (story) {
+    const succeeded = await postHasSucceeded(story.link)
+    if (succeeded) {
+      console.log('Posting succeeded:', story.title)
+      // after successful post we take it off the queue
+      await writeNewQueue(newQueue)
+    } else {
+      console.log('Posting failed:', story.title)
+    }
   } else {
-    console.log('Posting failed:', story.title)
+    console.log('Nothing to post. Moving on.')
   }
+  return newQueue
 }
 
 module.exports.postNext = postNext
